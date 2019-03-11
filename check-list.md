@@ -5,7 +5,7 @@
 - - -
 
 
-- [ ] Habilitar senha root
+- [ ] __Habilitar senha root__
 
 ```
 sudo passwd root
@@ -13,7 +13,7 @@ sudo passwd root
 
 - - -
 
-- [ ] Editar sources.list
+- [ ] __Editar sources.list__
 
 ```
 sudo nano /etc/apt/sources.list
@@ -21,7 +21,7 @@ sudo nano /etc/apt/sources.list
 
 - - -
 
-- [ ] Substituir repositórios por...
+- [ ] __substituir repositórios por...__
 
 ```
 deb http://ftp.br.debian.org/debian/ sid main contrib non-free
@@ -30,15 +30,16 @@ deb-src http://ftp.br.debian.org/debian/ sid main contrib non-free
 
 - - -
 
-- [ ] Atualizar...
+- [ ] __Atualizar...__
 
 ```
 sudo apt update
+sudo apt upgrade
 ```
 
 - - -
 
-- [ ] Baixar script de instalação dos programas iniciais
+- [ ] __Baixar script de instalação dos programas iniciais__
 
 ```
 git clone https://github.com/debxp/sid-install.git
@@ -46,9 +47,8 @@ git clone https://github.com/debxp/sid-install.git
 
 - - -
 
-- [ ] Instalar aplicativos e complementos externos
+- [ ] __Instalar aplicativos e complementos externos__
 
-### Diversos
 
 * atom
 * etcher
@@ -65,7 +65,7 @@ git clone https://github.com/debxp/sid-install.git
 
 - - -
 
-- [ ] configurar o autostart do OpenBox
+- [ ] __configurar o autostart do OpenBox__
 
 ```
 ~/.screenlayout/default.sh &
