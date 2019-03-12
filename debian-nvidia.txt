@@ -1,0 +1,558 @@
+Debian
+
+Wiki
+
+Entrar
+
+  • FrontPage
+  • AlteraçõesRecentes
+  • PesquisaDePáginas
+  • ConteúdosDeAjuda
+  • NvidiaGraphicsDrivers
+
+Pesquisar: [                    ] [Search Titles] [Search Full Text]
+Debian
+Wiki/
+
+  • Entrar
+  • Comentários
+  • Informação
+  • Anexos
+  • Mais Acções [Texto sem formato            ] [Proceder]
+
+  • NvidiaGraphicsDrivers
+
+Translation(s): English - Español - Français - Italiano - Русский - 简体中文
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+NVIDIA Proprietary Driver
+
+This page describes how to install the NVIDIA proprietary display driver on Debian systems.
+
+NOTE: For Apple systems, follow these steps first to prevent a black screen after installing the drivers: http://askubuntu.com/a/613573/134848
+
+Conteúdo
+
+ 1. NVIDIA Proprietary Driver
+     1. Identification
+         1. nvidia-detect
+     2. Drivers
+     3. Installation
+         1. Debian 9 "Stretch"
+             1. Version 390.48 (via stretch-backports)
+             2. Version 375.66
+             3. Version 340.102 (legacy GPUs)
+             4. Version 304.135 (legacy GPUs)
+         2. Debian 8 "Jessie"
+             1. Version 375.66 (via jessie-backports)
+             2. Version 340.102
+             3. Version 304.135 (legacy GPUs)
+         3. Debian 7 "Wheezy"
+             1. Version 340.96 (via wheezy-backports)
+             2. Version 304.125
+             3. Version 173.14.35 (legacy GPUs)
+             4. Version 96.43.23 (legacy GPUs)
+         4. Building newer releases from GIT
+         5. Building newer releases from SVN
+     4. Configuration
+         1. Automatic
+         2. Manual
+     5. CUDA
+         1. Debian 9 "Stretch"
+     6. Troubleshooting
+     7. Backing out in case of failure
+     8. See Also
+
+Identification
+
+The NVIDIA graphics processing unit (GPU) series/codename of an installed video card can usually be identified using the lspci command. For example:
+
+  • $ lspci -nn | egrep -i "3d|display|vga"
+    01:00.0 VGA compatible controller [0300]: NVIDIA Corporation G80 [GeForce 8800 GTS] [10de:0193] (rev a2)
+
+See HowToIdentifyADevice/PCI for more information. The PCI ID can be used to verify device support.
+
+Note: if this lspci command returns more than one line of output, you have an Optimus (hybrid) graphics chipset, and the instructions on this page do not apply to you. Check the Bumblebee
+page instead.
+
+nvidia-detect
+
+The nvidia-detect script (nvidia-detect package in non-free) can also be used to identify the GPU and required driver:
+
+  • $ nvidia-detect
+    Detected NVIDIA GPUs:
+    02:00.0 VGA compatible controller [0300]: NVIDIA Corporation GF108 [GeForce GT 430] [10de:0de1] (rev a1)
+    Your card is supported by the default drivers.
+    It is recommended to install the
+        nvidia-driver
+    package.
+
+Drivers
+
+The proprietary "NVIDIA Accelerated Linux Graphics Driver" provides optimized hardware acceleration of OpenGL applications via a direct-rendering X server. It is a binary-only Xorg driver
+requiring a Linux kernel module for its use.
+
+Multiple precompiled driver versions are available for Debian 9 "Stretch":
+
+  • Version 390.48 (supported devices)
+      □ For Fermi/Kepler/Maxwell/newer GPUs.
+      □ Note that 390.48 is currently only available in stretch-backports.
+  • Version 375.66 (supported devices)
+      □ For Kepler/Maxwell/newer GPUs.
+  • Version 340.102 (legacy GPUs) (supported devices)
+      □ For GeForce 8xxx through 7xx GPUs.
+  • Version 304.135 (legacy GPUs) (supported devices)
+      □ For GeForce 6xxx and 7xxx GPUs.
+
+Multiple precompiled driver versions are available for Debian 8 "Jessie":
+
+  • Version 375.66 (supported devices)
+      □ For Kepler/Maxwell/newer GPUs.
+      □ Note that 375.66 is currently only available in jessie-backports.
+  • Version 340.102 (supported devices)
+      □ For GeForce 8xxx through 7xx GPUs.
+  • Version 304.135 (legacy GPUs) (supported devices)
+      □ For GeForce 6xxx and 7xxx GPUs.
+
+Four driver versions are available for Debian 7 "Wheezy":
+
+  • Version 340.65 (supported devices)
+      □ For GeForce 8xxx and higher GPUs.
+  • Version 304.125 (supported devices)
+      □ For GeForce 6xxx and higher GPUs.
+  • Version 173.14.35 (legacy GPUs) (supported devices)
+      □ For GeForce 5xxx / GeForce FX GPUs.
+  • Version 96.43.23 (legacy GPUs) (supported devices)
+      □ For GeForce 2, GeForce 3 and GeForce 4 GPUs.
+
+All versions above are available only for the x86 and x86-64 architectures (Debian i386 and AMD64 ports respectively).
+
+Installation
+
+Debian 9 "Stretch"
+
+As of stretch, you don't need nvidia-xconfig anymore, and a xorg.conf file is not needed either in most situations. Also, the 340 series has been forked into its own series of packages to
+support older cards.
+
+Version 390.48 (via stretch-backports)
+
+For support of Geforce 4xx and higher GPUs Supported devices. For older devices, see Version 340.102 (legacy GPUs) and Version 304.135 (legacy GPUs).
+
+ 1. Add stretch-backports to your /etc/apt/sources.list, for example:
+
+    # stretch-backports
+    deb http://httpredir.debian.org/debian stretch-backports main contrib non-free
+
+ 2. Install Linux headers for the kernel you are using. If you are using the 4.9 Linux kernel in Debian Stretch:
+
+    # apt-get install linux-headers-$(uname -r|sed 's/[^-]*-[^-]*-//')
+
+    Or if you are using a Linux kernel from stretch-backports:
+
+    # apt-get install -t stretch-backports linux-headers-$(uname -r|sed 's/[^-]*-[^-]*-//')
+
+ 3. Then we can install the package nvidia-driver.
+
+    # apt-get update
+    # apt-get install -t stretch-backports nvidia-driver
+
+    DKMS will build the nvidia module for your system.
+ 4. Restart your system to enable the nouveau blacklist.
+
+Version 375.66
+
+For support of ?GeForce 4xx and higher GPUs (supported devices). For older devices, see Version 340.105 (legacy GPUs) and Version 304.135 (legacy GPUs).
+
+ 1. Add "contrib" and "non-free" components to /etc/apt/sources.list, for example:
+
+    # Debian 9 "Stretch"
+    deb http://httpredir.debian.org/debian/ stretch main contrib non-free
+
+ 2. Update the list of available packages. Install the appropriate linux-headers and kernel module packages:
+
+    # apt update
+    # apt install linux-headers-$(uname -r|sed 's/[^-]*-[^-]*-//') nvidia-driver
+
+    This will install the nvidia-driver package. DKMS will build the nvidia module for your system, via the nvidia-kernel-dkms package.
+ 3. Restart your system to enable the nouveau blacklist.
+ 4. (The answer here may be needed to enable a higher resolution.)
+
+Version 340.102 (legacy GPUs)
+
+For support of GeForce 6xxx and 7xxx GPUs (supported devices).
+
+ 1. Add "contrib" and "non-free" components to /etc/apt/sources.list, for example:
+
+    # Debian 9 "Stretch"
+    deb http://httpredir.debian.org/debian/ stretch main contrib non-free
+
+ 2. Update the list of available packages. Install the appropriate linux-headers and kernel module packages:
+
+    # apt update
+    # apt install linux-headers-$(uname -r|sed 's/[^-]*-[^-]*-//') nvidia-legacy-340xx-driver
+
+    This will install the nvidia-legacy-340xx-driver package. DKMS will build the nvidia module for your system, via the nvidia-legacy-340xx-kernel-dkms package.
+ 3. Create an Xorg server configuration file.
+ 4. Restart your system to enable the nouveau blacklist.
+
+Version 304.135 (legacy GPUs)
+
+For support of GeForce 6xxx and 7xxx GPUs (supported devices).
+
+ 1. Add "contrib" and "non-free" components to /etc/apt/sources.list, for example:
+
+    # Debian 9 "Stretch"
+    deb http://httpredir.debian.org/debian/ stretch main contrib non-free
+
+ 2. Update the list of available packages. Install the appropriate linux-headers and kernel module packages:
+
+    # apt update
+    # apt install linux-headers-$(uname -r|sed 's/[^-]*-[^-]*-//') nvidia-legacy-304xx-driver
+
+    This will install the nvidia-legacy-304xx-driver package. DKMS will build the nvidia module for your system, via the nvidia-legacy-304xx-kernel-dkms package.
+ 3. Create an Xorg server configuration file.
+ 4. Restart your system to enable the nouveau blacklist.
+
+Debian 8 "Jessie"
+
+As of jessie, if you only need basic functionality and don't care about performances, the need for the proprietary drivers is pretty much over - nouveau now works quite well and works with
+dual-headed displays by simple and easy configuring from within your desktop (for KDE Plasma see System_Settings/Hardware/Display_and_Monitor/Display_Configuration). The proprietary drivers
+don't provide normal logging and can be a hidden source of problems. If you are doing a distribution upgrade, you should at the very least remove all the nvidia packages from wheezy, get
+your desktop working with nouveau, then reinstall the nvidia packages if there is a pressing reason.
+
+Version 375.66 (via jessie-backports)
+
+For support of Geforce 4xx and higher GPUs Supported devices. For older devices, see Version 340.102 (legacy GPUs) and Version 304.135 (legacy GPUs).
+
+ 1. Add jessie-backports to your /etc/apt/sources.list, for example:
+
+    # jessie-backports
+    deb http://httpredir.debian.org/debian jessie-backports main contrib non-free
+
+ 2. Install Linux headers for the kernel you are using. If you are using the 3.16 Linux kernel in Debian Jessie:
+
+    # apt-get install linux-headers-$(uname -r|sed 's/[^-]*-[^-]*-//')
+
+    Or if you are already using a Linux kernel from jessie-backports:
+
+    # apt-get install -t jessie-backports linux-headers-$(uname -r|sed 's/[^-]*-[^-]*-//')
+
+ 3. Then we can install the package nvidia-driver.
+
+    # apt-get update
+    # apt-get install -t jessie-backports nvidia-driver
+
+    DKMS will build the nvidia module for your system.
+ 4. Restart your system to enable the nouveau blacklist.
+
+Version 340.102
+
+For support of GeForce 8xxx and higher GPUs (supported devices). For older devices, see Version 304.135 (legacy GPUs).
+
+ 1. Add "contrib" and "non-free" components to /etc/apt/sources.list, for example:
+
+    # Debian 8 "Jessie"
+    deb http://httpredir.debian.org/debian/ jessie main contrib non-free
+
+ 2. Update the list of available packages. Install the appropriate linux-headers and kernel module packages:
+
+    # aptitude update
+    # aptitude -r install linux-headers-$(uname -r|sed 's/[^-]*-[^-]*-//') nvidia-driver
+
+    This will install the nvidia-driver package. DKMS will build the nvidia module for your system, via the nvidia-kernel-dkms package.
+ 3. Create an Xorg server configuration file.
+ 4. Restart your system to enable the nouveau blacklist.
+ 5. (The answer here may be needed to enable a higher resolution.)
+
+Version 304.135 (legacy GPUs)
+
+For support of GeForce 6xxx and 7xxx GPUs (supported devices).
+
+ 1. Add "contrib" and "non-free" components to /etc/apt/sources.list, for example:
+
+    # Debian 8 "Jessie"
+    deb http://httpredir.debian.org/debian/ jessie main contrib non-free
+
+ 2. Update the list of available packages. Install the appropriate linux-headers and kernel module packages:
+
+    # aptitude update
+    # aptitude -r install linux-headers-$(uname -r|sed 's/[^-]*-[^-]*-//') nvidia-legacy-304xx-driver
+
+    This will install the nvidia-legacy-304xx-driver package. DKMS will build the nvidia module for your system, via the nvidia-legacy-304xx-kernel-dkms package.
+ 3. Create an Xorg server configuration file.
+ 4. Restart your system to enable the nouveau blacklist.
+
+Debian 7 "Wheezy"
+
+Version 340.96 (via wheezy-backports)
+
+For support of GeForce 8xxx and higher GPUs (supported devices). This is made available from wheezy-backports.
+
+ 1. Add wheezy-backports to your /etc/apt/sources.list, for example:
+
+    # wheezy-backports
+    deb http://httpredir.debian.org/debian/ wheezy-backports main contrib non-free
+
+ 2. Update the list of available packages:
+
+    # aptitude update
+
+ 3. Install the appropriate linux-headers package:
+
+    # aptitude install linux-headers-$(uname -r|sed 's/[^-]*-[^-]*-//')
+
+ 4. Install the kernel module package from wheezy-backports:
+
+    # aptitude -t wheezy-backports -r install nvidia-driver
+
+    This will install the nvidia-driver package. DKMS will build the nvidia module for your system, via the nvidia-kernel-dkms package.
+ 5. Create an Xorg server configuration file.
+ 6. Restart your system to enable the nouveau blacklist.
+
+Version 304.125
+
+For support of GeForce 6xxx and higher GPUs (supported devices). For older devices, see Version 173.14.35 (legacy GPUs) and Version 96.43.23 (legacy GPUs).
+
+ 1. Add "contrib" and "non-free" components to /etc/apt/sources.list, for example:
+
+    # Debian 7 "Wheezy"
+    deb http://httpredir.debian.org/debian/ wheezy main contrib non-free
+
+ 2. Update the list of available packages. Install the appropriate linux-headers and kernel module packages:
+
+    # aptitude update
+    # aptitude -r install linux-headers-$(uname -r|sed 's/[^-]*-[^-]*-//') nvidia-glx
+
+    This will install the nvidia-glx package. DKMS will build the nvidia module for your system, via the nvidia-kernel-dkms package.
+ 3. Create an Xorg server configuration file.
+ 4. Restart your system to enable the nouveau blacklist.
+
+Version 173.14.35 (legacy GPUs)
+
+For support of GeForce 5xxx / GeForce FX GPUs (supported devices).
+
+ 1. Add "contrib" and "non-free" components to /etc/apt/sources.list, for example:
+
+    # Debian 7 "Wheezy"
+    deb http://httpredir.debian.org/debian/ wheezy main contrib non-free
+
+ 2. Update the list of available packages. Install the appropriate linux-headers and kernel module packages:
+
+    # aptitude update
+    # aptitude -r install linux-headers-$(uname -r|sed 's/[^-]*-[^-]*-//') nvidia-legacy-173xx-driver
+
+    This will install the nvidia-glx-legacy-173xx package. DKMS will build the nvidia module for your system, via the nvidia-legacy-173xx-kernel-dkms package.
+ 3. Create an Xorg server configuration file.
+ 4. Restart your system to enable the nouveau blacklist.
+
+Version 96.43.23 (legacy GPUs)
+
+For support of GeForce 2, GeForce 3 and GeForce 4 GPUs (supported devices).
+
+ 1. Add "contrib" and "non-free" components to /etc/apt/sources.list, for example:
+
+    # Debian 7 "Wheezy"
+    deb http://httpredir.debian.org/debian/ wheezy main contrib non-free
+
+ 2. Update the list of available packages. Install the appropriate linux-headers and kernel module packages:
+
+    # aptitude update
+    # aptitude -r install linux-headers-$(uname -r|sed 's/[^-]*-[^-]*-//') nvidia-driver
+
+    This will also install the recommended nvidia-glx-legacy-96xx package. DKMS will build the nvidia module for your system, via the nvidia-legacy-96xx-kernel-dkms package.
+ 3. Create an Xorg server configuration file.
+ 4. Restart your system to enable the nouveau blacklist.
+
+Building newer releases from GIT
+
+TODO...
+
+Building newer releases from SVN
+
+As new upstream versions of the proprietary driver are released, upload might not happen immediately. This might be for various reasons, including waiting for new binary packages to clear
+the NEW queue, which has to be approved manually by the FTP masters.
+
+Before running the upstream installer, which might cause problems to your installation, you can build and install the packages locally if they are ready on SVN. Check if the version you are
+interested in is available:
+
+https://anonscm.debian.org/viewvc/pkg-nvidia/packages/nvidia-graphics-drivers/branches/
+
+If it is, install the following:
+
+# apt-get install subversion svn-buildpackage
+# apt-get build-dep nvidia-driver
+
+Then checkout the branch you want and build it locally: 
+
+# svn co svn://anonscm.debian.org/pkg-nvidia/packages/nvidia-graphics-drivers/branches/384
+# cd 384
+# debian/rules get-orig-source
+# mkdir ../tarballs
+# mv nvidia-graphics-drivers* ../tarballs
+# svn-buildpackage --svn-ignore -us -uc -rfakeroot
+
+and if you need multiarch packages (i.e. i386 on amd64) - required for steam to work:
+
+# sudo apt-get install libwayland-client0:i386 libwayland-server0:i386
+# svn-buildpackage --svn-ignore --svn-arch=i386 -us -uc -rfakeroot
+
+NOTE: for the multiarch, for example on amd64 with i386, you must NOT install all the packages from the foreign architecture, but ONLY either libgl1-nvidia-glx-i386 or
+nvidia-driver-libs-i386 depending on the branch, and their dependencies.
+
+NOTE: to use get-orig-source you'll need tar version 1.29 or higher, if that is not an option (e.g. in jessie) you can modify the debian/rules file by deleting the new tar arguments that
+doesn't exist in older tar versions (--clamp-mtime and --sort):
+
+$ svn diff debian/rules
+Index: debian/rules
+===================================================================
+--- debian/rules        (revision 6570)
++++ debian/rules        (working copy)
+@@ -380,8 +380,7 @@
+            chmod 0755 $(ORIGDIR.$*)/* ; \
+            latestfile=$$(ls -tr $$(find $(ORIGDIR.$*) -type f) | tail -n 1) ; \
+            tar cv \
+-               --clamp-mtime --mtime="./$$latestfile" \
+-               --sort=name \
++               --mtime="./$$latestfile" \
+                --owner=root --group=src \
+                $(ORIGDIR.$*) \
+                | gzip -n -9 > $(TARBALL.$*) ; \
+
+This way debian/rules get-orig-source command will work fine in jessie. In case it doesn't work you may try creating the tarball manually following the schema used by an existing one in the
+Debian archive.
+
+NOTE: if the svn-buildpackage command fails with a message from tar like this: 
+
+tar: /home/foo/tmp/nvidia/build-area/tmp-0.834000333984481: Cannot open: No such file or directory
+tar: Error is not recoverable: exiting now
+Command ' tar --no-same-owner --no-same-permissions --extract --file /home/foo/tmp/nvidia/tarballs/nvidia-graphics-drivers_367.35.orig-armhf.tar.gz --directory /home/foo/tmp/nvidia/build-area/tmp-0.834000333984481' failed in '/home/foo/tmp/nvidia/367', how to continue now? [Qri?]:
+
+then create the missing /home/foo/tmp/nvidia/build-area/tmp-0.834000333984481 directory (the name changes every time, so create it in another terminal) and press r to retry the command. You
+will need to create the directory twice. After that, the build should succeed.
+
+Configuration
+
+As the nvidia driver is not autodetected by Xorg, a configuration file is required to be supplied. However, the configuration described below should not be applied to Nvidia Optimus systems;
+on such systems, the primary X display is driven by your Intel GPU, which is autodetected by X. See Bumblebee for more details on how to configure an Optimus system.
+
+Automatic
+
+Install the nvidia-xconfig package, then run it with sudo. It will automatically generate a Xorg configuration file at /etc/X11/xorg.conf.
+
+Manual
+
+For example:
+
+/etc/X11/xorg.conf.d/20-nvidia.conf
+
+  • Section "Device"
+            Identifier "My GPU"
+            Driver "nvidia"
+    EndSection
+
+The configuration file above can be created using these commands:
+
+  • # mkdir /etc/X11/xorg.conf.d
+    # echo -e 'Section "Device"\n\tIdentifier "My GPU"\n\tDriver "nvidia"\nEndSection' > /etc/X11/xorg.conf.d/20-nvidia.conf
+
+Please note that this configuration will break Xorg on Optimus systems. For such hardware, see Bumblebee instead.
+
+Restart your system at this point to enable the nouveau driver blacklist.
+
+Additional configuration information is available.
+
+CUDA
+
+Debian 9 "Stretch"
+
+CUDA 8 is available from the non-free repository
+
+# apt-get install nvidia-cuda-dev nvidia-cuda-toolkit  nvidia-driver
+
+This installs nvcc and friends. The visual profiler is in a seperate package nvidia-visual-profiler.
+
+CUDA 8 only supports gcc 5.3.1, which is not available for Stretch. To compile you need to add -ccbin clang-3.8 to the nvcc command line.
+
+The Debian CUDA packages unfortunately do not include the Toolkit samples. To install these yourself you need to download the "Ubuntu 16.04" .run install file for Cuda 8 from https://
+developer.nvidia.com/cuda-downloads. Execute the .run file and (after accepting the licence and agreeing to run on a non-supported system) skip the driver and toolkit installation and just
+select "Samples. Note before this step you must
+
+export PERL5LIB=.
+
+To compile the samples, you first need to set
+
+export HOST_COMPILER=clang++-3.8
+
+Note that if you are mixed code compiled with gcc and nvcc, you may need to also add
+
+--compiler-options -fpie
+
+to nvcc command line 
+
+Troubleshooting
+
+  • The NVIDIA driver conflicts with the nouveau DRM driver (580894). The nouveau kernel module is blacklisted by the glx-alternative-nvidia or nvidia-kernel-common packages.
+      □ Restart your system after configuring Xorg for the NVIDIA driver.
+      □ From xserver-xorg-video-nouveau's README.Debian:
+
+        If you decide to switch to the proprietary driver, it is highly
+        recommended to reboot because it is incompatible with nouveau, and
+        unloading the latter is not easy and may lead to a blank console.
+
+  • If you can't change the screen brightness, open your Xorg configuration file (/etc/X11/xorg.conf or /etc/X11/xorg.conf.d/20-nvidia.conf depending on which method you used) and add
+
+        Option         "RegistryDwords" "EnableBrightnessControl=1;"
+
+    to the Device section. In some case (eg. ?GeForce GT 650M Mac Edition) it may cause screen flickering during boot time (just after grub screen), and system will not boot. In this case
+    you should use instead add the following:
+
+    setpci -v -H1 -s 00:01.00 BRIDGE_CONTROL=0
+
+    to the file: /etc/rc.local
+  • Additional troubleshooting information is available.
+
+Backing out in case of failure
+
+In case you want to restore your system to the state it was before, do:
+
+If you can't use your desktop environment:
+
+hit Ctrl+alt+F2
+
+login as root 
+
+ # apt-get purge nvidia. (don't forget the "." dot) It erases every package with "nvidia" on its name
+
+
+ # /etc/init.d/gdm3 stop  (gdm3 for gnome 3)
+
+ # apt-get install --reinstall xserver-xorg
+ # apt-get install --reinstall xserver-xorg-video-nouveau
+
+ # killall Xorg
+
+ # reboot
+
+Xorg should reconfigure itself, if not run a terminal and pass
+
+# X -configure
+
+See Also
+
+  • /Configuration
+  • /Troubleshooting
+  • /Optimus
+  • Xorg
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+CategoryProprietarySoftware
+
+NvidiaGraphicsDrivers (última alteração 2018-06-23 21:29:19)
+
+  • Debian privacy policy
+  • MoinMoin Powered
+  • Python Powered
+  • Debian Wiki team, bugs and config available.
+  • Hosting provided by Metropolitan Area Network Darmstadt
+
