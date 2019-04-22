@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-sudo apt install \
+sudo apt-get update
+sudo apt-get install \
 aisleriot \
 alsa-utils \
 apt-listbugs \
