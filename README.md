@@ -96,6 +96,8 @@
 
 **inxi:** *full featured system information script*
 
+**kazam:** *aplicativo de screencast e screenshot criado com design em mente*
+
 **libgnome-keyring0:** *biblioteca de serviços de chaveiro GNOME (GNOME keyring)*
 
 **libgnome-keyring-common:** *GNOME keyring services library - data files*

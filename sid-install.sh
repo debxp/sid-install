@@ -46,6 +46,7 @@ htop \
 idle3 \
 inkscape \
 inxi \
+kazam \
 libgnome-keyring0 \
 libgnome-keyring-common \
 libreoffice \
